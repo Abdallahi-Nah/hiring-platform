@@ -58,9 +58,14 @@ export default async function JobsPage({
           <p className="hint mt-1">{t("admin.jobs.subtitle")}</p>
         </div>
         {canEdit && (
-          <Link href="/admin/jobs/new" className="btn btn-primary">
-            {t("admin.jobs.newJob")}
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/jobs/import" className="btn">
+              {t("imp.button")}
+            </Link>
+            <Link href="/admin/jobs/new" className="btn btn-primary">
+              {t("admin.jobs.newJob")}
+            </Link>
+          </div>
         )}
       </div>
 
