@@ -11,6 +11,7 @@ AI-powered, multi-tenant hiring and assessment SaaS. Candidates apply through a 
 ### For candidates
 - Public job board with live search, filters (type, mode, location, salary, dates) and pagination
 - Multi-step application: text and voice answers, CV upload, profile links, optional assignment
+- Video interview from a private link: answer the AI-written questions on camera (one attempt per question, 90 seconds each)
 - Optional candidate account: profile, private CV, saved jobs, daily job alerts, "My applications"
 - Sign in with email/password or Google
 - Private tracking page per application (status timeline) with live chat and read receipts (✓ sent, ✓✓ delivered, ✓✓ green = read)
@@ -20,6 +21,7 @@ AI-powered, multi-tenant hiring and assessment SaaS. Candidates apply through a 
 - Job builder (questions, deadline, salary range, duplicate job, company logo)
 - Candidate list and **Kanban board** (drag and drop), CV search, internal notes
 - AI assistance: speech-to-text, CV parsing, scoring, interview analysis. AI only suggests; humans decide
+- AI video interviews: questions written by the AI, video answers with transcript, per-answer scores and a recommendation
 - Real-time inbox (`/admin/messages`) and notification bell over WebSocket (Supabase Realtime)
 - Customisable email templates (reject, invite, offer) per language
 - Dashboard: views, conversion, time to hire, per-job funnel
@@ -87,6 +89,11 @@ AI suggestion, answers, notes, decision and messages.
 
 ![Candidate details](docs/images/screens/candidate-detail.gif)
 
+### AI video interview
+The AI writes the questions, the candidate answers on camera from a private link, and the AI evaluates the answers. The fake camera in this recording shows a placeholder person.
+
+![AI video interview](docs/images/screens/ai-video-interview.gif)
+
 ### Messages inbox
 Live conversations with unread badges and ticks.
 
@@ -118,7 +125,7 @@ npm install
 ```
 
 ### Database
-1. In the Supabase SQL Editor, run every file in `supabase/migrations/` **in order** (`001` → `017`).
+1. In the Supabase SQL Editor, run every file in `supabase/migrations/` **in order** (`001` → `018`).
 2. In **Authentication → Sign In / Providers**, keep sign-ups enabled and turn **Confirm email** on (candidate sign-up requires it).
 3. Optional, for Google sign-in: enable the Google provider and add `http://localhost:3000/**` to **Redirect URLs**.
 4. Create the first company through `/register`. Then make your account the platform owner:
@@ -164,7 +171,7 @@ src/
   i18n/           en / fr / ar messages and helpers
   lib/            Auth, AI, email, realtime, rate limit, export, Supabase clients
 supabase/
-  migrations/     SQL migrations 001 → 017 (schema, RLS, storage, realtime)
+  migrations/     SQL migrations 001 → 018 (schema, RLS, storage, realtime)
 scripts/          Tooling (i18n check)
 docs/images/      SVG diagrams and animated GIF screens used in this README
 ```

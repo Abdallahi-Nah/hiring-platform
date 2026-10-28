@@ -79,7 +79,7 @@ export function BellMenu({ items, unread }: { items: BellItem[]; unread: number 
               onClick={close}
               className={`grid gap-0.5 rounded-lg px-2 py-2 text-sm hover:bg-surface-2 ${i.unread ? "bg-surface-2 font-semibold" : ""}`}
             >
-              <span dir="auto">{t(i.kind === "message" ? "hr1.bell.message" : "hr1.bell.application", { who: i.who })}</span>
+              <span dir="auto">{t(i.kind === "message" ? "hr1.bell.message" : i.kind === "interview" ? "ivid.bell" : "hr1.bell.application", { who: i.who })}</span>
               <span className="hint font-normal" dir="auto">{i.job} · {i.when}</span>
             </Link>
           ))}

@@ -84,7 +84,7 @@ async function waitForInputs(applicationId: string) {
 
 async function buildInput(applicationId: string, jobId: string) {
   const db = createAdminClient();
-  const [{ data: job }, { data: questions }, { data: answers }, { data: resume }, { data: profiles }, { data: interviews }] =
+  const [{ data: job }, { data: questions }, { data: answers }, { data: resume }, { data: profiles }, { data: interviews }, { data: videoInterview }] =
     await Promise.all([
       db.from("job_forms").select("title, description, evaluation_criteria").eq("id", jobId).single(),
       db.from("questions").select("id, type, label, is_salary, config, page_number, position").eq("job_form_id", jobId).order("page_number").order("position"),
@@ -92,6 +92,7 @@ async function buildInput(applicationId: string, jobId: string) {
       db.from("resumes").select("parsed_data").eq("application_id", applicationId).maybeSingle(),
       db.from("external_profiles").select("type, url, parsed_data").eq("application_id", applicationId),
       db.from("interviews").select("audio_analysis").eq("application_id", applicationId),
+      db.from("ai_interviews").select("score, evaluation").eq("application_id", applicationId).eq("eval_status", "done").maybeSingle(),
     ]);
 
   const byQuestion = new Map((answers ?? []).map((a) => [a.question_id, a]));
@@ -133,6 +134,7 @@ async function buildInput(applicationId: string, jobId: string) {
         external_profiles: externalProfiles,
         assignment,
         interview_audio_analysis: (interviews ?? []).map((i) => i.audio_analysis),
+        ai_video_interview: videoInterview?.score != null ? { score: videoInterview.score, evaluation: videoInterview.evaluation } : undefined,
       },
     },
   };

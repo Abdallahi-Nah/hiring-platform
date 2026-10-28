@@ -16,8 +16,8 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // Le micro est autorisé pour nos pages (questions vocales) ; le reste est coupé.
-          { key: "Permissions-Policy", value: "microphone=(self), camera=(), geolocation=()" },
+          // Le micro (questions vocales) et la caméra (entretien vidéo) sont autorisés pour nos pages ; le reste est coupé.
+          { key: "Permissions-Policy", value: "microphone=(self), camera=(self), geolocation=()" },
           {
             key: "Content-Security-Policy",
             value: "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'",

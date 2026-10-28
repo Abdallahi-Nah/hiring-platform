@@ -28,15 +28,17 @@ export async function GET(req: Request) {
     if (!apps?.length) break;
     const ids = apps.map((a) => a.id);
 
-    const [{ data: audio }, { data: cvs }, { data: interviews }] = await Promise.all([
+    const [{ data: audio }, { data: cvs }, { data: interviews }, { data: videos }] = await Promise.all([
       db.from("answers").select("audio_url").in("application_id", ids).not("audio_url", "is", null),
       db.from("resumes").select("file_url").in("application_id", ids),
       db.from("interviews").select("media_url").in("application_id", ids).not("media_url", "is", null),
+      db.from("ai_interview_answers").select("video_path, ai_interviews!inner(application_id)").in("ai_interviews.application_id", ids),
     ]);
     const files: [string, string[]][] = [
       ["audio", (audio ?? []).map((r) => r.audio_url as string)],
       ["resumes", (cvs ?? []).map((r) => r.file_url as string)],
       ["interviews", (interviews ?? []).map((r) => r.media_url as string)],
+      ["ai-interviews", (videos ?? []).map((r) => r.video_path as string)],
     ];
     // Si un fichier ne peut pas être supprimé, on garde la candidature : elle sera reprise demain.
     for (const [bucket, paths] of files) {

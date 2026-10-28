@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { CompanyLogo } from "@/components/ui/CompanyLogo";
@@ -13,6 +14,8 @@ import { TrackChat } from "./TrackChat";
 
 export const instant = false;
 export const metadata = { robots: { index: false, follow: false } };
+
+const isPast = (d?: string | null) => !!d && new Date(d) < new Date();
 
 export default async function TrackPage({ params }: { params: Promise<{ token: string }> }) {
   await connection();
@@ -35,10 +38,11 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
     .single();
   if (!app || app.status === "incomplete") notFound();
 
-  const [{ data: hr }, { count: interviews }, { data: messages }] = await Promise.all([
+  const [{ data: hr }, { count: interviews }, { data: messages }, { data: aiIv }] = await Promise.all([
     db.from("hr_evaluations").select("hr_decision").eq("application_id", app.id).maybeSingle(),
     db.from("interviews").select("id", { count: "exact", head: true }).eq("application_id", app.id),
     db.from("messages").select("id, sender, sender_name, body, created_at, delivered_at, read_at").eq("application_id", app.id).order("created_at").limit(200),
+    db.from("ai_interviews").select("token, status, expires_at, questions").eq("application_id", app.id).in("status", ["invited", "in_progress"]).maybeSingle(),
   ]);
   const job = app.job_forms as unknown as { title: string; companies: { name: string; logo_path: string | null } | null } | null;
 
@@ -64,6 +68,15 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
           )}
           {app.submitted_at && <p className="hint">{t("track.sentOn", { date: fmt(app.submitted_at) })}</p>}
         </div>
+
+        {aiIv && !isPast(aiIv.expires_at) && (
+          <section className="card grid gap-2" aria-labelledby="aiiv-h">
+            <h2 id="aiiv-h" className="sub-title">{t("ivid.track.title")}</h2>
+            <p className="text-sm">{t("ivid.track.text", { company: job?.companies?.name ?? t("track.team"), count: Array.isArray(aiIv.questions) ? aiIv.questions.length : 0 })}</p>
+            {aiIv.expires_at && <p className="hint">{t("ivid.track.until", { date: new Date(aiIv.expires_at).toLocaleDateString(formatLocale(locale), { dateStyle: "long" }) })}</p>}
+            <div><Link href={`/interview/${aiIv.token}`} className="btn btn-primary">{t("ivid.track.button")}</Link></div>
+          </section>
+        )}
 
         <section className="card grid gap-3" aria-labelledby="steps-h">
           <h2 id="steps-h" className="sub-title">{t("track.status")}</h2>
