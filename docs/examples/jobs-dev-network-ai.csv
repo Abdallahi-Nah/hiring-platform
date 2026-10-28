@@ -1,0 +1,181 @@
+﻿title,description,department,location,work_mode,employment_type,deadline,salary_min,salary_max,salary_currency,reference,required_skills,min_years
+Senior Backend Developer (NestJS / PostgreSQL),"Join our product team to design and scale the APIs behind our hiring platform, used by companies across West Africa.
+
+Responsibilities:
+- Design, build and maintain REST APIs with NestJS and TypeScript
+- Model data and optimise queries in PostgreSQL
+- Write automated tests and review code
+- Monitor performance and fix production issues
+
+Requirements:
+- 4+ years of backend experience
+- Strong TypeScript and PostgreSQL skills
+- Experience with Docker and CI/CD
+- Good written English or French
+
+We offer:
+- Hybrid work from Nouakchott
+- Learning budget and modern tooling
+- Health insurance",Engineering,Nouakchott,hybrid,full_time,2026-12-20,2500,4000,USD,DEV-001,TypeScript|NestJS|PostgreSQL|Docker|REST APIs,4
+Frontend Developer (React / Next.js),"Build fast, accessible and beautiful interfaces for candidates and recruiters, in English, French and Arabic (right-to-left).
+
+Responsibilities:
+- Develop pages and components with React and Next.js
+- Turn designs into responsive, accessible interfaces
+- Handle internationalisation and right-to-left layouts
+- Work with designers and backend developers
+
+Requirements:
+- 3+ years with React and TypeScript
+- Good knowledge of HTML, CSS and Tailwind CSS
+- Care for accessibility and performance
+- Experience with Next.js is a plus
+
+We offer:
+- 100% remote, flexible hours
+- Equipment allowance
+- Paid conferences",Engineering,Remote,remote,full_time,2026-12-31,1800,3000,USD,DEV-002,React|Next.js|TypeScript|Tailwind CSS|Accessibility,3
+Mobile Developer (Flutter),"Create the mobile app that lets candidates apply, track their application and chat with recruiters from their phone.
+
+Responsibilities:
+- Build and publish Flutter apps for Android and iOS
+- Integrate REST APIs and push notifications
+- Optimise the app for low bandwidth and older devices
+- Fix bugs and ship updates
+
+Requirements:
+- 2+ years of Flutter and Dart
+- Experience with Firebase or Supabase
+- Knowledge of Git and app store publishing
+- Portfolio of published apps
+
+We offer:
+- Contract with possible extension
+- Hybrid work from Nouadhibou
+- Modern devices provided",Engineering,Nouadhibou,hybrid,contract,2027-01-31,1500,2500,USD,DEV-003,Flutter|Dart|Firebase|REST APIs|Git,2
+Network Engineer (Cisco / Juniper),"Operate and improve the enterprise network of a growing company with several sites in Mauritania.
+
+Responsibilities:
+- Configure and maintain routers, switches and wireless networks
+- Manage routing (BGP, OSPF), VLANs and VPN links
+- Monitor the network and solve incidents quickly
+- Document the architecture and plan upgrades
+
+Requirements:
+- 3+ years as a network engineer
+- CCNA or equivalent certification (CCNP is a plus)
+- Strong knowledge of TCP/IP, routing and switching
+- Ability to work on call when needed
+
+We offer:
+- On-site in Nouakchott
+- Certification budget
+- Performance bonus",Network & Infrastructure,Nouakchott,onsite,full_time,2026-12-25,70000,110000,MRU,NET-001,Cisco|Juniper|BGP|OSPF|VLAN|Firewalls,3
+Network Security Engineer,"Protect our networks and customer data against threats, and lead our security monitoring.
+
+Responsibilities:
+- Manage firewalls, VPNs and intrusion detection systems
+- Monitor logs with a SIEM and respond to incidents
+- Run vulnerability scans and follow up on fixes
+- Write security policies and train the team
+
+Requirements:
+- 4+ years in network security
+- Experience with firewalls (Fortinet, Palo Alto or similar)
+- Knowledge of IDS/IPS, SIEM and incident response
+- Security certification such as CISSP, CEH or Security+ is a plus
+
+We offer:
+- Hybrid work from Nouakchott
+- Training and certification budget
+- Health insurance",Cybersecurity,Nouakchott,hybrid,full_time,2027-01-20,2200,3500,USD,NET-002,Firewalls|IDS/IPS|VPN|Network Security|SIEM,4
+DevOps / Cloud Engineer,"Automate our infrastructure and deployments so that teams can release safely and often.
+
+Responsibilities:
+- Build and maintain CI/CD pipelines
+- Manage cloud infrastructure with Terraform
+- Run containers on Kubernetes and monitor them
+- Improve reliability, cost and security
+
+Requirements:
+- 4+ years in DevOps or system engineering
+- Strong Linux, Docker and Kubernetes skills
+- Experience with Terraform and a major cloud provider
+- Scripting in Bash or Python
+
+We offer:
+- 100% remote
+- Home-office allowance
+- Flexible hours",Infrastructure,Remote,remote,full_time,2027-02-10,2800,4200,EUR,NET-003,Linux|Docker|Kubernetes|CI/CD|Terraform,4
+Network Support Technician (Internship),"Learn on the job with our network team: you help users, install equipment and keep the network running.
+
+Responsibilities:
+- Install and test cables, switches and Wi-Fi access points
+- Help users with connection problems
+- Keep an inventory of the equipment
+- Assist the network engineers on projects
+
+Requirements:
+- Studying or graduated in networks or computer science
+- Basic knowledge of TCP/IP and Windows or Linux
+- Curious, careful and good team player
+- No professional experience required
+
+We offer:
+- 6-month internship, possible job offer
+- Mentoring by senior engineers
+- Monthly allowance",IT Operations,Nouadhibou,onsite,internship,2027-02-28,15000,25000,MRU,NET-004,TCP/IP|Windows Server|Linux|Cabling|Troubleshooting,0
+Machine Learning Engineer,"Build the models that score and rank job applications fairly, and put them into production.
+
+Responsibilities:
+- Train, evaluate and improve machine learning models
+- Build data pipelines and feature stores
+- Deploy models with MLOps best practices and monitor them
+- Check models for bias and explain their results
+
+Requirements:
+- 3+ years in machine learning
+- Strong Python, PyTorch or scikit-learn, and SQL
+- Experience deploying models to production
+- Master's degree or equivalent experience
+
+We offer:
+- 100% remote
+- Compute budget for experiments
+- Conference and publication support",AI & Data,Remote,remote,full_time,2027-01-31,3000,5000,USD,AI-001,Python|PyTorch|Scikit-learn|MLOps|SQL,3
+NLP / LLM Engineer (Arabic & French),"Build language features for Arabic, French and English: transcription, CV parsing, question generation and answer evaluation.
+
+Responsibilities:
+- Design prompts and retrieval (RAG) pipelines with large language models
+- Evaluate and fine-tune models for Arabic and French
+- Build reliable, safe and low-cost AI services
+- Measure quality and reduce errors and bias
+
+Requirements:
+- 3+ years in NLP or applied AI
+- Strong Python and experience with LLM APIs and Hugging Face
+- Good level in Arabic and French or English
+- Care for privacy and responsible AI
+
+We offer:
+- Hybrid work from Nouakchott
+- Budget for AI services
+- Learning days every month",AI & Data,Nouakchott,hybrid,full_time,2027-02-15,3200,5500,USD,AI-002,Python|LLMs|Prompt Engineering|NLP|RAG|Hugging Face,3
+Data Scientist,"Turn hiring data into insights that help companies recruit faster and more fairly.
+
+Responsibilities:
+- Analyse application and hiring data to find trends
+- Build dashboards and reports for customers
+- Design experiments and statistical tests
+- Work with engineers to ship data features
+
+Requirements:
+- 2+ years as a data scientist or analyst
+- Python (pandas), SQL and data visualisation
+- Good knowledge of statistics
+- Clear communication with non-technical people
+
+We offer:
+- Hybrid work from Nouakchott
+- Training budget
+- Health insurance",AI & Data,Nouakchott,hybrid,full_time,2027-01-10,1800,3000,USD,AI-003,Python|SQL|Statistics|Data Visualization|Pandas,2
