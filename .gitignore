@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# fichier généré par Next.js (outil d'aide au code), ne pas versionner
+AGENTS.md
