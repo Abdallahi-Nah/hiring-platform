@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 600" width="1100" height="600" role="img" aria-labelledby="t d">
+  <title id="t">Real-time chat and read receipts</title>
+  <desc id="d">Messages travel over WebSocket and the tick marks follow delivery and reading.</desc>
+  <rect x="0.75" y="0.75" width="1098.5" height="598.5" rx="16" fill="#ffffff" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="32" y="46" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#1f2328" text-anchor="start">Real-time chat and read receipts</text>
+  <text x="32" y="70" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#656d76" text-anchor="start">WebSocket (Supabase Realtime): no page reload on either side.</text>
+  <rect x="60" y="100" width="160" height="40" rx="10" fill="#ffffff" stroke="#8250df" stroke-width="1.8"/>
+  <text x="140" y="126" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#1f2328" text-anchor="middle">HR team</text>
+  <line x1="140" y1="140" x2="140" y2="450" stroke="#d0d7de" stroke-width="2" stroke-dasharray="5 5"/>
+  <rect x="340" y="100" width="160" height="40" rx="10" fill="#ffffff" stroke="#0969da" stroke-width="1.8"/>
+  <text x="420" y="126" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#1f2328" text-anchor="middle">Next.js server</text>
+  <line x1="420" y1="140" x2="420" y2="450" stroke="#d0d7de" stroke-width="2" stroke-dasharray="5 5"/>
+  <rect x="620" y="100" width="160" height="40" rx="10" fill="#ffffff" stroke="#00b141" stroke-width="1.8"/>
+  <text x="700" y="126" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#1f2328" text-anchor="middle">Supabase Realtime</text>
+  <line x1="700" y1="140" x2="700" y2="450" stroke="#d0d7de" stroke-width="2" stroke-dasharray="5 5"/>
+  <rect x="880" y="100" width="160" height="40" rx="10" fill="#ffffff" stroke="#00b141" stroke-width="1.8"/>
+  <text x="960" y="126" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#1f2328" text-anchor="middle">Candidate</text>
+  <line x1="960" y1="140" x2="960" y2="450" stroke="#d0d7de" stroke-width="2" stroke-dasharray="5 5"/>
+  <polyline points="140.0,180.0 410.0,180.0" fill="none" stroke="#8250df" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="420.0,180.0 410.9,184.1 410.9,175.9" fill="#8250df"/>
+  <text x="280.0" y="172" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="middle">1. HR sends a message</text>
+  <polyline points="420.0,220.0 690.0,220.0" fill="none" stroke="#0969da" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="700.0,220.0 690.9,224.1 690.9,215.9" fill="#0969da"/>
+  <text x="560.0" y="212" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="middle">2. Saved, then broadcast on the secret channel</text>
+  <polyline points="700.0,260.0 950.0,260.0" fill="none" stroke="#00b141" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="960.0,260.0 950.9,264.1 950.9,255.9" fill="#00b141"/>
+  <text x="830.0" y="252" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="middle">3. Candidate sees it instantly</text>
+  <polyline points="960.0,300.0 430.0,300.0" fill="none" stroke="#00b141" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="420.0,300.0 429.1,295.9 429.1,304.1" fill="#00b141"/>
+  <text x="690.0" y="292" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="middle">4. Page open: delivered, visible: read</text>
+  <polyline points="700.0,340.0 150.0,340.0" fill="none" stroke="#00b141" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="140.0,340.0 149.1,335.9 149.1,344.1" fill="#00b141"/>
+  <text x="420.0" y="332" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="middle">5. Receipt update (UPDATE event)</text>
+  <polyline points="960.0,380.0 710.0,380.0" fill="none" stroke="#57606a" stroke-width="2" stroke-linejoin="round" stroke-dasharray="7 5"/>
+  <polygon points="700.0,380.0 709.1,375.9 709.1,384.1" fill="#57606a"/>
+  <text x="830.0" y="372" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="middle">6. Typing indicator, both ways (no database)</text>
+  <rect x="32" y="480" width="1036" height="90" rx="14" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="52" y="508" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#1f2328" text-anchor="start">Tick marks on your own messages</text>
+  <path d="M55 530.5l3.2 3.2L65 526.5" fill="none" stroke="#57606a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="78" y="535" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#656d76" text-anchor="start">Sent</text>
+  <path d="M193.5 530.5l3.2 3.2L203.5 526.5M200.5 533.4l.4.3L209.5 526.5" fill="none" stroke="#57606a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="218" y="535" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#656d76" text-anchor="start">Delivered (grey): the other side is connected</text>
+  <path d="M573.5 530.5l3.2 3.2L583.5 526.5M580.5 533.4l.4.3L589.5 526.5" fill="none" stroke="#00b141" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="598" y="535" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#656d76" text-anchor="start">Read (green): the conversation is on screen</text>
+  <text x="52" y="560" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="start">When the candidate reads, the HR bell notification for that message disappears.</text>
+</svg>

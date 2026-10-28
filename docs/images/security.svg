@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 560" width="1100" height="560" role="img" aria-labelledby="t d">
+  <title id="t">Security model</title>
+  <desc id="d">Company isolation by Row Level Security, roles, and candidate accounts without staff access.</desc>
+  <rect x="0.75" y="0.75" width="1098.5" height="558.5" rx="16" fill="#ffffff" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="32" y="46" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#1f2328" text-anchor="start">Security model</text>
+  <text x="32" y="70" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#656d76" text-anchor="start">Rules live in Postgres, not only in the interface.</text>
+  <rect x="32" y="100" width="330" height="270" rx="14" fill="#f6f8fa" stroke="#8250df" stroke-width="1.8"/>
+  <text x="197" y="130" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#1f2328" text-anchor="middle">Company A</text>
+  <rect x="738" y="100" width="330" height="270" rx="14" fill="#f6f8fa" stroke="#0969da" stroke-width="1.8"/>
+  <text x="903" y="130" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#1f2328" text-anchor="middle">Company B</text>
+  <rect x="52" y="148" width="290" height="40" rx="8" fill="#ffffff" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="197" y="173" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle">Jobs and questions</text>
+  <rect x="52" y="200" width="290" height="40" rx="8" fill="#ffffff" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="197" y="225" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle">Applications and CVs</text>
+  <rect x="52" y="252" width="290" height="40" rx="8" fill="#ffffff" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="197" y="277" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle">Messages and notes</text>
+  <rect x="52" y="304" width="290" height="40" rx="8" fill="#ffffff" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="197" y="329" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle">Email templates</text>
+  <rect x="758" y="148" width="290" height="40" rx="8" fill="#ffffff" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="903" y="173" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle">Jobs and questions</text>
+  <rect x="758" y="200" width="290" height="40" rx="8" fill="#ffffff" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="903" y="225" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle">Applications and CVs</text>
+  <rect x="758" y="252" width="290" height="40" rx="8" fill="#ffffff" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="903" y="277" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle">Messages and notes</text>
+  <rect x="758" y="304" width="290" height="40" rx="8" fill="#ffffff" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="903" y="329" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle">Email templates</text>
+  <rect x="420" y="100" width="260" height="270" rx="14" fill="#ffffff" stroke="#cf222e" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="550" y="150" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#cf222e" text-anchor="middle">Row Level Security</text>
+  <text x="550" y="190" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">Every table is protected</text>
+  <text x="550" y="216" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">company_id = my company</text>
+  <text x="550" y="242" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">Realtime obeys the same rules</text>
+  <text x="550" y="300" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle">A user from A can never read</text>
+  <text x="550" y="320" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle">or write the data of B</text>
+  <rect x="32" y="410" width="330" height="120" rx="10" fill="#ffffff" stroke="#8250df" stroke-width="1.8"/>
+  <rect x="42" y="410" width="310" height="5" rx="2.5" fill="#8250df"/>
+  <text x="197.0" y="440" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#1f2328" text-anchor="middle">Staff roles</text>
+  <text x="197.0" y="462" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">Super Admin: users, company settings</text>
+  <text x="197.0" y="480" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">Admin: invite, decide, templates</text>
+  <text x="197.0" y="498" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">Reviewer: read and chat, no salary data</text>
+  <rect x="385" y="410" width="330" height="120" rx="10" fill="#ffffff" stroke="#00b141" stroke-width="1.8"/>
+  <rect x="395" y="410" width="310" height="5" rx="2.5" fill="#00b141"/>
+  <text x="550.0" y="440" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#1f2328" text-anchor="middle">Candidates</text>
+  <text x="550.0" y="462" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">A Supabase user without a staff profile</text>
+  <text x="550.0" y="480" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">so /admin always refuses them</text>
+  <text x="550.0" y="498" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">Tracking link is a secret and can be renewed</text>
+  <rect x="738" y="410" width="330" height="120" rx="10" fill="#ffffff" stroke="#bc4c00" stroke-width="1.8"/>
+  <rect x="748" y="410" width="310" height="5" rx="2.5" fill="#bc4c00"/>
+  <text x="903.0" y="440" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#1f2328" text-anchor="middle">Server only</text>
+  <text x="903.0" y="462" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">Service-role key never reaches the browser</text>
+  <text x="903.0" y="480" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">Rate limits per IP, signed applicant cookie</text>
+  <text x="903.0" y="498" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="400" fill="#656d76" text-anchor="middle">AI never receives names, emails or salaries</text>
+</svg>
