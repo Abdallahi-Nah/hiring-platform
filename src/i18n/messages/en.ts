@@ -24,6 +24,15 @@ export const en = {
     trackLine: "Track your application",
     footer: "Track your application, read messages and reply here:",
   },
+  act: {
+    button: "Activate drafts ({n})",
+    confirm: "Activate {n} inactive jobs? Jobs without an Email question or with a past deadline are skipped. Activated jobs become visible on the public jobs page.",
+    working: "Activating...",
+    done: "{n} jobs activated.",
+    skipNoEmail: "{n} skipped: no Email question.",
+    skipExpired: "{n} skipped: deadline already past.",
+    none: "No job could be activated.",
+  },
   imp: {
     button: "Import CSV",
     title: "Import jobs from a CSV file",

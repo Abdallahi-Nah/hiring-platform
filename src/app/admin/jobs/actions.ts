@@ -6,6 +6,7 @@ import { z } from "zod";
 import { getI18n } from "@/i18n/server";
 import type { MessageKey, TFunction } from "@/i18n/translate";
 import { requireUser } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { parseJobForm, questionSchema, type QuestionRow } from "@/lib/jobs/schema";
 
@@ -201,4 +202,41 @@ export async function reorderQuestions(input: unknown): Promise<{ error?: string
     )
   );
   return results.some((r) => r.error) ? { error: t("admin.errors.cannotSaveOrder") } : {};
+}
+
+export type ActivateResult = { error?: string; activated?: number; noEmail?: number; expired?: number };
+
+const chunks = <T,>(xs: T[], n: number) => Array.from({ length: Math.ceil(xs.length / n) }, (_, i) => xs.slice(i * n, i * n + n));
+
+// Active tous les brouillons de l'entreprise (règles RLS). Mêmes règles qu'une activation seule :
+// il faut la question Email, et une date limite pas encore passée. Les autres restent inactives.
+export async function activateAllJobs(): Promise<ActivateResult> {
+  await requireUser([...STAFF]);
+  const { t } = await getI18n();
+  if (!(await rateLimit("jobs-activate-all", 20, 3600))) return { error: t("common.tooMany") };
+  const supabase = await createClient();
+
+  const { data: drafts } = await supabase.from("job_forms").select("id, deadline").eq("is_active", false).limit(500);
+  if (!drafts?.length) return { activated: 0, noEmail: 0, expired: 0 };
+
+  const withEmail = new Set<string>();
+  for (const part of chunks(drafts.map((d) => d.id), 50)) {
+    const { data } = await supabase.from("questions").select("job_form_id").in("job_form_id", part).eq("type", "short_text").eq("config->>identity", "email");
+    for (const q of data ?? []) withEmail.add(q.job_form_id);
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  let noEmail = 0;
+  let expired = 0;
+  const ids: string[] = [];
+  for (const j of drafts) {
+    if (!withEmail.has(j.id)) noEmail++;
+    else if (j.deadline && j.deadline < today) expired++;
+    else ids.push(j.id);
+  }
+  for (const part of chunks(ids, 50)) {
+    const { error } = await supabase.from("job_forms").update({ is_active: true }).in("id", part);
+    if (error) return { error: t("admin.errors.cannotSaveJob") };
+  }
+  revalidatePath("/admin/jobs");
+  return { activated: ids.length, noEmail, expired };
 }

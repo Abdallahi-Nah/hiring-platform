@@ -23,6 +23,15 @@ export const fr: Messages = {
     trackLine: "Suivre ma candidature",
     footer: "Suivez votre candidature, lisez les messages et répondez ici :",
   },
+  act: {
+    button: "Activer les brouillons ({n})",
+    confirm: "Activer {n} offres inactives ? Les offres sans question Email ou avec une date limite passée sont ignorées. Les offres activées deviennent visibles sur l'accueil.",
+    working: "Activation...",
+    done: "{n} offres activées.",
+    skipNoEmail: "{n} ignorées : pas de question Email.",
+    skipExpired: "{n} ignorées : date limite déjà passée.",
+    none: "Aucune offre n'a pu être activée.",
+  },
   imp: {
     button: "Importer un CSV",
     title: "Importer des offres depuis un fichier CSV",

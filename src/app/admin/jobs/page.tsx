@@ -9,6 +9,7 @@ import { IconSearch } from "@/components/ui/icons";
 import { getI18n } from "@/i18n/server";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { ActivateAll } from "./ActivateAll";
 
 export const instant = false;
 
@@ -38,6 +39,8 @@ export default async function JobsPage({
   const counts = new Map<string, number>();
   for (const a of apps ?? []) counts.set(a.job_form_id, (counts.get(a.job_form_id) ?? 0) + 1);
 
+  const drafts = (all ?? []).filter((j) => !j.is_active).length;
+
   const matching = (all ?? []).filter((j) => {
     if (!inDateRange(j.created_at, from, to)) return false;
     if (state === "active" && !j.is_active) return false;
@@ -58,7 +61,8 @@ export default async function JobsPage({
           <p className="hint mt-1">{t("admin.jobs.subtitle")}</p>
         </div>
         {canEdit && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-start gap-2">
+            {drafts > 0 && <ActivateAll count={drafts} />}
             <Link href="/admin/jobs/import" className="btn">
               {t("imp.button")}
             </Link>
