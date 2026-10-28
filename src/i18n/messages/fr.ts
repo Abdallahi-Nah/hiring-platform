@@ -58,7 +58,8 @@ export const fr: Messages = {
       expiredText: "Contactez l'entreprise pour recevoir un nouveau lien.",
       errPermission: "L'accès à la caméra ou au micro a été refusé. Autorisez-le dans les réglages du navigateur, puis rechargez la page.",
       errSupport: "Votre navigateur ne peut pas enregistrer de vidéo. Utilisez une version récente de Chrome, Edge, Firefox ou Safari.",
-      errGeneric: "Un problème est survenu. Veuillez réessayer.",
+      errNetwork: "Problème de connexion. Vérifiez votre connexion internet et réessayez. Votre enregistrement est conservé.",
+    errGeneric: "Un problème est survenu. Veuillez réessayer.",
     },
     errors: {
       invalid: "Ce lien d'entretien n'est pas valide.",

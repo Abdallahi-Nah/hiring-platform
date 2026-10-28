@@ -7,6 +7,8 @@ export const MAX_ANSWER_SECONDS = 90;
 export const MIN_ANSWER_SECONDS = 3;
 export const INVITE_DAYS = 7;
 export const RETENTION_MONTHS = 12;
+export const VIDEO_BITS_PER_SECOND = 450_000;
+export const AUDIO_BITS_PER_SECOND = 64_000;
 export const MAX_VIDEO_BYTES = 25 * 1024 * 1024; // limite de Whisper (offre gratuite Groq)
 export const VIDEO_TYPES: Record<string, string> = { "video/webm": "webm", "video/mp4": "mp4", "video/quicktime": "mov" };
 

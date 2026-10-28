@@ -10,26 +10,18 @@ export const maxDuration = 300;
 
 const fail = (error: string, status: number, code?: string) => NextResponse.json({ error, code }, { status });
 
-// Le candidat envoie la vidéo d'une réponse (une seule tentative par question). Le jeton secret du lien fait office de session.
+// Confirme une réponse : la vidéo est déjà dans Supabase Storage (envoi direct). On vérifie le fichier, puis on l'enregistre.
 export async function POST(req: Request, { params }: { params: Promise<{ token: string }> }) {
   const { t } = await getI18n();
   const { token } = await params;
   if (!UUID.test(token)) return fail(t("ivid.errors.invalid"), 404);
-  if (!(await rateLimit("iv-upload", 80, 3600))) return fail(t("common.tooMany"), 429);
+  if (!(await rateLimit("iv-confirm", 120, 3600))) return fail(t("common.tooMany"), 429);
 
-  let form: FormData;
-  try {
-    form = await req.formData();
-  } catch {
-    return fail(t("ivid.errors.upload"), 400);
-  }
-  const file = form.get("file");
-  const index = Number(form.get("index"));
-  const seconds = Math.round(Number(form.get("seconds")));
-  if (!(file instanceof File) || !Number.isInteger(index) || index < 0) return fail(t("ivid.errors.upload"), 400);
-  if (file.size < 1000 || file.size > MAX_VIDEO_BYTES) return fail(t("ivid.errors.size"), 413);
-  const baseType = file.type.split(";")[0].trim().toLowerCase();
-  const ext = VIDEO_TYPES[baseType];
+  const body = (await req.json().catch(() => null)) as { index?: unknown; seconds?: unknown; type?: unknown } | null;
+  const index = Number(body?.index);
+  const seconds = Math.round(Number(body?.seconds));
+  const ext = typeof body?.type === "string" ? VIDEO_TYPES[body.type.split(";")[0].trim().toLowerCase()] : undefined;
+  if (!Number.isInteger(index) || index < 0) return fail(t("ivid.errors.upload"), 400);
   if (!ext) return fail(t("ivid.errors.format"), 415);
 
   const db = createAdminClient();
@@ -39,19 +31,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
   const total = Array.isArray(iv.questions) ? iv.questions.length : 0;
   if (index >= total) return fail(t("ivid.errors.upload"), 400);
 
-  const path = `${iv.id}/${index}.${ext}`;
-  const { error: upErr } = await db.storage.from("ai-interviews").upload(path, file, { contentType: baseType, upsert: false });
-  if (upErr) return fail(t("ivid.errors.exists"), 409, "exists");
+  // Le fichier doit exister, avoir un format vidéo accepté et une taille correcte.
+  const name = `${index}.${ext}`;
+  const path = `${iv.id}/${name}`;
+  const { data: files } = await db.storage.from("ai-interviews").list(iv.id, { limit: 100, search: String(index) });
+  const file = files?.find((f) => f.name === name);
+  if (!file) return fail(t("ivid.errors.upload"), 400);
+  const size = Number((file.metadata as { size?: number } | null)?.size ?? 0);
+  if (size < 1000 || size > MAX_VIDEO_BYTES) {
+    await db.storage.from("ai-interviews").remove([path]);
+    return fail(t("ivid.errors.size"), 413);
+  }
 
   const { data: answer, error: insErr } = await db
     .from("ai_interview_answers")
     .insert({ interview_id: iv.id, question_index: index, video_path: path, duration_seconds: Math.min(Math.max(seconds || 0, 0), MAX_ANSWER_SECONDS + 15) })
     .select("id")
     .single();
-  if (insErr || !answer) {
-    await db.storage.from("ai-interviews").remove([path]);
-    return fail(t("ivid.errors.exists"), 409, "exists");
-  }
+  if (insErr || !answer) return fail(t("ivid.errors.exists"), 409, "exists");
   await db.from("ai_interviews").update({ status: "in_progress", started_at: new Date().toISOString() }).eq("id", iv.id).eq("status", "invited");
 
   after(() => transcribeInterviewAnswer(answer.id));

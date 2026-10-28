@@ -131,8 +131,9 @@ export async function deleteAiInterview(interviewId: string): Promise<IvResult> 
   const iv = await ownInterview(interviewId);
   if (!iv) return { error: t("ivid.hr.errState") };
   const db = createAdminClient();
-  const { data: rows } = await db.from("ai_interview_answers").select("video_path").eq("interview_id", iv.id);
-  const paths = (rows ?? []).map((r) => r.video_path as string);
+  // Tout le dossier de l'entretien : aussi les vidéos envoyées mais jamais confirmées.
+  const { data: files } = await db.storage.from("ai-interviews").list(iv.id, { limit: 100 });
+  const paths = (files ?? []).map((f) => `${iv.id}/${f.name}`);
   if (paths.length) {
     const { error } = await db.storage.from("ai-interviews").remove(paths);
     if (error) return { error: t("ivid.hr.errDelete") };

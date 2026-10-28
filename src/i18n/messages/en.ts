@@ -59,7 +59,8 @@ export const en = {
       expiredText: "Please contact the company to get a new link.",
       errPermission: "Camera or microphone access was refused. Allow it in your browser settings, then reload the page.",
       errSupport: "Your browser cannot record video. Use a recent Chrome, Edge, Firefox or Safari.",
-      errGeneric: "Something went wrong. Please try again.",
+      errNetwork: "Connection problem. Check your internet connection and try again. Your recording is kept.",
+    errGeneric: "Something went wrong. Please try again.",
     },
     errors: {
       invalid: "This interview link is not valid.",

@@ -2,9 +2,39 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/i18n/client";
-import { MAX_ANSWER_SECONDS, MIN_ANSWER_SECONDS, PREP_SECONDS } from "@/lib/ai/interview-config";
+import { AUDIO_BITS_PER_SECOND, MAX_ANSWER_SECONDS, MIN_ANSWER_SECONDS, PREP_SECONDS, VIDEO_BITS_PER_SECOND } from "@/lib/ai/interview-config";
+import { createClient } from "@/lib/supabase/client";
 
 type Stage = "intro" | "check" | "prep" | "record" | "upload" | "done";
+
+const API_TIMEOUT_MS = 30_000;
+const UPLOAD_TIMEOUT_MS = 150_000;
+
+// Erreur définitive (réponse 4xx du serveur) : inutile de réessayer.
+class ApiError extends Error {}
+
+const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
+  new Promise((resolve, reject) => {
+    const id = setTimeout(() => reject(new Error("timeout")), ms);
+    p.then(
+      (v) => (clearTimeout(id), resolve(v)),
+      (e) => (clearTimeout(id), reject(e))
+    );
+  });
+
+async function withRetry<T>(fn: () => Promise<T>, tries = 3): Promise<T> {
+  let last: unknown;
+  for (let k = 0; k < tries; k++) {
+    try {
+      return await fn();
+    } catch (e) {
+      last = e;
+      if (e instanceof ApiError) throw e;
+      await new Promise((r) => setTimeout(r, 1500 * (k + 1)));
+    }
+  }
+  throw last;
+}
 
 const pickMime = () => ["video/webm;codecs=vp8,opus", "video/webm", "video/mp4"].find((m) => MediaRecorder.isTypeSupported(m));
 
@@ -24,7 +54,7 @@ export function InterviewRoom({ token, questions, answered, speechLang, months }
   const video = useRef<HTMLVideoElement>(null);
   const recorder = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
-  const pending = useRef<{ blob: Blob; seconds: number } | null>(null);
+  const pending = useRef<{ blob: Blob; seconds: number; stored: boolean } | null>(null);
   const done = useRef(new Set(answered));
   const indexRef = useRef(index);
   const secondsRef = useRef(0);
@@ -116,13 +146,13 @@ export function InterviewRoom({ token, questions, answered, speechLang, months }
     if (!s || recorder.current?.state === "recording") return;
     window.speechSynthesis?.cancel();
     const mime = pickMime();
-    const rec = new MediaRecorder(s, { ...(mime ? { mimeType: mime } : {}), videoBitsPerSecond: 600_000, audioBitsPerSecond: 64_000 });
+    const rec = new MediaRecorder(s, { ...(mime ? { mimeType: mime } : {}), videoBitsPerSecond: VIDEO_BITS_PER_SECOND, audioBitsPerSecond: AUDIO_BITS_PER_SECOND });
     chunks.current = [];
     rec.ondataavailable = (e) => {
       if (e.data.size > 0) chunks.current.push(e.data);
     };
     rec.onstop = () => {
-      pending.current = { blob: new Blob(chunks.current, { type: rec.mimeType || mime || "video/webm" }), seconds: secondsRef.current };
+      pending.current = { blob: new Blob(chunks.current, { type: rec.mimeType || mime || "video/webm" }), seconds: secondsRef.current, stored: false };
       void upload();
     };
     rec.start(1000);
@@ -137,40 +167,70 @@ export function InterviewRoom({ token, questions, answered, speechLang, months }
   }
   stopRef.current = stopRecording;
 
+  // Envoi en 3 temps (Vercel refuse les requêtes de plus de 4,5 Mo) :
+  // 1) lien d'envoi signé, 2) vidéo envoyée directement à Supabase Storage, 3) confirmation de la réponse.
+  // Chaque étape a un délai maximum et 3 essais : sur un réseau faible, la page ne reste jamais bloquée.
   async function upload() {
     const p = pending.current;
     if (!p) return;
     setStage("upload");
     setError("");
     try {
-      const form = new FormData();
-      form.append("file", p.blob, "answer.webm");
-      form.append("index", String(indexRef.current));
-      form.append("seconds", String(p.seconds));
-      const res = await fetch(`/api/interview/${token}/answer`, { method: "POST", body: form });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok && json.code !== "exists") throw new Error(json.error || t("ivid.room.errGeneric"));
-      done.current.add(indexRef.current);
+      const i = indexRef.current;
+      const type = p.blob.type.split(";")[0] || "video/webm";
+      let already = false;
+      if (!p.stored) {
+        const r1 = await callApi(`/api/interview/${token}/upload-url`, { index: i, type });
+        if (r1.status === 409 && r1.json.code === "exists") already = true;
+        else {
+          if (!r1.ok) throw new ApiError(r1.json.error || t("ivid.room.errNetwork"));
+          await withRetry(async () => {
+            const { error: upErr } = await withTimeout(createClient().storage.from("ai-interviews").uploadToSignedUrl(r1.json.path ?? "", r1.json.token ?? "", p.blob, { contentType: type }), UPLOAD_TIMEOUT_MS);
+            if (upErr) throw new Error("upload");
+          });
+          p.stored = true;
+        }
+      }
+      if (!already) {
+        const r2 = await callApi(`/api/interview/${token}/answer`, { index: i, seconds: p.seconds, type });
+        if (!r2.ok && r2.json.code !== "exists") throw new ApiError(r2.json.error || t("ivid.room.errNetwork"));
+      }
+      done.current.add(i);
       pending.current = null;
-      const next = questions.findIndex((_, i) => !done.current.has(i));
+      const next = questions.findIndex((_, k) => !done.current.has(k));
       if (next === -1) await finish();
       else goPrep(next);
     } catch (e) {
-      setError(e instanceof Error ? e.message : t("ivid.room.errGeneric"));
+      setError(e instanceof ApiError ? e.message : t("ivid.room.errNetwork"));
     }
+  }
+
+  // Appel JSON : 3 essais si le réseau coupe ou si le serveur répond 5xx ; une réponse 4xx est définitive.
+  async function callApi(url: string, body: unknown): Promise<{ ok: boolean; status: number; json: { error?: string; code?: string; path?: string; token?: string } }> {
+    return withRetry(async () => {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), API_TIMEOUT_MS);
+      try {
+        const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal });
+        const json = await res.json().catch(() => ({}));
+        if (res.status >= 500) throw new Error("server");
+        return { ok: res.ok, status: res.status, json };
+      } finally {
+        clearTimeout(timer);
+      }
+    });
   }
 
   async function finish() {
     setStage("upload");
     setError("");
     try {
-      const res = await fetch(`/api/interview/${token}/finish`, { method: "POST" });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error || t("ivid.room.errGeneric"));
+      const res = await callApi(`/api/interview/${token}/finish`, {});
+      if (!res.ok) throw new ApiError(res.json.error || t("ivid.room.errNetwork"));
       stream.current?.getTracks().forEach((tr) => tr.stop());
       setStage("done");
     } catch (e) {
-      setError(e instanceof Error ? e.message : t("ivid.room.errGeneric"));
+      setError(e instanceof ApiError ? e.message : t("ivid.room.errNetwork"));
     }
   }
 
