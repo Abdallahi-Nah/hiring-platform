@@ -12,6 +12,7 @@ AI-powered, multi-tenant hiring and assessment SaaS. Candidates apply through a 
 - Public job board with live search, filters (type, mode, location, salary, dates) and pagination
 - Multi-step application: text and voice answers, CV upload, profile links, optional assignment
 - Video interview from a private link: answer the AI-written questions on camera (one attempt per question, 90 seconds each)
+- Live video interview with the recruiter inside the platform (private link, chat, screen sharing on desktop, nothing recorded), with an email reminder one hour before
 - Optional candidate account: profile, private CV, saved jobs, daily job alerts, "My applications"
 - Sign in with email/password or Google
 - Private tracking page per application (status timeline) with live chat and read receipts (✓ sent, ✓✓ delivered, ✓✓ green = read)
@@ -22,6 +23,9 @@ AI-powered, multi-tenant hiring and assessment SaaS. Candidates apply through a 
 - Candidate list and **Kanban board** (drag and drop), CV search, internal notes
 - AI assistance: speech-to-text, CV parsing, scoring, interview analysis. AI only suggests; humans decide
 - AI video interviews: questions written by the AI, video answers with transcript, per-answer scores and a recommendation
+- Live interviews: pick a date and duration, the candidate gets an email invitation, and the dashboard lists the upcoming ones. Peer-to-peer WebRTC video with Supabase Realtime for signalling
+- Interview feedback: four ratings (communication, technical, motivation, team fit) and a comment per team member, with the team average. Candidates never see it
+- One-click PDF dossier of a candidate (AI evaluation, video and live interviews, feedback, HR decision, answers), in English, French or Arabic
 - Real-time inbox (`/admin/messages`) and notification bell over WebSocket (Supabase Realtime)
 - Customisable email templates (reject, invite, offer) per language
 - Dashboard: views, conversion, time to hire, per-job funnel
@@ -125,7 +129,7 @@ npm install
 ```
 
 ### Database
-1. In the Supabase SQL Editor, run every file in `supabase/migrations/` **in order** (`001` → `018`).
+1. In the Supabase SQL Editor, run every file in `supabase/migrations/` **in order** (`001` → `021`).
 2. In **Authentication → Sign In / Providers**, keep sign-ups enabled and turn **Confirm email** on (candidate sign-up requires it).
 3. Optional, for Google sign-in: enable the Google provider and add `http://localhost:3000/**` to **Redirect URLs**.
 4. Create the first company through `/register`. Then make your account the platform owner:
@@ -146,6 +150,7 @@ Create `.env.local` (never commit it):
 | `GMAIL_USER`, `GMAIL_APP_PASSWORD` | yes | Transactional email |
 | `CRON_SECRET` | yes | Bearer secret that protects `/api/cron/*` |
 | `NEXT_PUBLIC_SITE_URL` | production | Public URL used in email links |
+| `TURN_URLS`, `TURN_USERNAME`, `TURN_CREDENTIAL` | no | TURN relay for live interviews on strict networks (comma-separated URLs). Without them only free STUN is used, which works on most networks. Server only |
 | `EMAIL_FROM` | no | Sender, e.g. `Company <hr@example.com>` |
 | `NEXT_PUBLIC_COMPANY_NAME` | no | Platform name on public pages (default: Hiring Platform) |
 | `TRANSCRIBE_MODEL`, `CLEAN_MODEL`, `PARSE_MODEL` | no | AI model overrides |
@@ -171,7 +176,7 @@ src/
   i18n/           en / fr / ar messages and helpers
   lib/            Auth, AI, email, realtime, rate limit, export, Supabase clients
 supabase/
-  migrations/     SQL migrations 001 → 018 (schema, RLS, storage, realtime)
+  migrations/     SQL migrations 001 → 021 (schema, RLS, storage, realtime, interviews, feedback)
 scripts/          Tooling (i18n check)
 docs/images/      SVG diagrams and animated GIF screens used in this README
 ```
@@ -182,6 +187,8 @@ docs/images/      SVG diagrams and animated GIF screens used in this README
 - Applicants have no password: a signed session cookie protects an in-progress application.
 - The tracking link (`/track/<token>`) is a secret. HR can renew it from the candidate page.
 - Names, emails, phones and salaries are not sent to the AI.
+- Interview links (`/interview/<token>`, `/meet/<token>`) are secrets. Live interview video goes directly between the two browsers and is never recorded or stored.
+- CVs and videos are uploaded straight to private storage with single-use signed URLs, then the server checks the real file type and size.
 - The service-role key is used on the server only, always after an RLS-scoped user check.
 - Reviewers never see salary data (database rules).
 
@@ -190,6 +197,8 @@ docs/images/      SVG diagrams and animated GIF screens used in this README
 - Update the Supabase **Site URL** and **Redirect URLs**, and the Google OAuth redirect, for the production domain
 - AI routes use `maxDuration = 300`; check that your Vercel plan allows it
 - Cron jobs are declared in `vercel.json` (retention at 03:00, job alerts at 07:00)
+- Live interview reminders: Vercel's free plan allows one cron per day, so call `GET /api/cron/reminders` every 10 minutes from a free scheduler (for example cron-job.org) with the header `Authorization: Bearer <CRON_SECRET>`
+- Put the Vercel function region next to your Supabase region: every database call adds latency
 - Remove or deactivate test jobs and rotate any key that was shared during development
 - Replace Gmail SMTP with a transactional email provider (Gmail allows roughly 500 emails per day)
 
@@ -197,6 +206,8 @@ docs/images/      SVG diagrams and animated GIF screens used in this README
 - Job content and AI-generated text are not translated; they stay in the language they were written in
 - Interview files: 25 MB max (Whisper limit); links are stored but not analysed
 - Candidate lists and search use the latest 1000 applications per job
+- Live interviews are one recruiter and one candidate. The free TURN plan has a monthly data limit. Screen sharing is not available on phones
+- The reminder email goes to the candidate only; recruiters see upcoming interviews on the dashboard
 - AI evaluation texts (strengths, weaknesses, interview questions) are in English
 
 ## License
