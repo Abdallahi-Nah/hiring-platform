@@ -58,7 +58,7 @@ export function LiveSync() {
   return (
     <div className="card fixed bottom-20 end-4 z-40 flex max-w-xs items-center gap-3 !p-3 shadow-lg md:bottom-6" role="status">
       <Link href={href} onClick={() => setToast(null)} className="flex-1 text-sm font-semibold">
-        {t(isMessage ? "rt.toast.message" : toast.kind === "interview" ? "ivid.toast" : "rt.toast.application")}
+        {t(isMessage ? "rt.toast.message" : toast.kind === "interview" ? "ivid.toast" : toast.kind === "live" ? "live.toast" : "rt.toast.application")}
       </Link>
       <button type="button" className="btn !p-1.5" aria-label={t("rt.toast.close")} onClick={() => setToast(null)}>×</button>
     </div>

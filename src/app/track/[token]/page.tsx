@@ -2,11 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { CompanyLogo } from "@/components/ui/CompanyLogo";
+import { LocalTime } from "@/components/ui/LocalTime";
 import { PublicShell } from "@/components/ui/PublicShell";
 import { formatLocale } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
 import type { MessageKey } from "@/i18n/translate";
 import { rateLimit } from "@/lib/rate-limit";
+import { roomWindow } from "@/lib/live-interview";
 import { computeStage, STEPS } from "@/lib/track-stage";
 import { UUID } from "@/lib/uuid";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -38,11 +40,12 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
     .single();
   if (!app || app.status === "incomplete") notFound();
 
-  const [{ data: hr }, { count: interviews }, { data: messages }, { data: aiIv }] = await Promise.all([
+  const [{ data: hr }, { count: interviews }, { data: messages }, { data: aiIv }, { data: live }] = await Promise.all([
     db.from("hr_evaluations").select("hr_decision").eq("application_id", app.id).maybeSingle(),
     db.from("interviews").select("id", { count: "exact", head: true }).eq("application_id", app.id),
     db.from("messages").select("id, sender, sender_name, body, created_at, delivered_at, read_at").eq("application_id", app.id).order("created_at").limit(200),
     db.from("ai_interviews").select("token, status, expires_at, questions").eq("application_id", app.id).in("status", ["invited", "in_progress"]).maybeSingle(),
+    db.from("live_interviews").select("token, status, scheduled_at, duration_minutes").eq("application_id", app.id).in("status", ["scheduled", "in_progress"]).maybeSingle(),
   ]);
   const job = app.job_forms as unknown as { title: string; companies: { name: string; logo_path: string | null } | null } | null;
 
@@ -75,6 +78,15 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
             <p className="text-sm">{t("ivid.track.text", { company: job?.companies?.name ?? t("track.team"), count: Array.isArray(aiIv.questions) ? aiIv.questions.length : 0 })}</p>
             {aiIv.expires_at && <p className="hint">{t("ivid.track.until", { date: new Date(aiIv.expires_at).toLocaleDateString(formatLocale(locale), { dateStyle: "long" }) })}</p>}
             <div><Link href={`/interview/${aiIv.token}`} className="btn btn-primary">{t("ivid.track.button")}</Link></div>
+          </section>
+        )}
+
+        {live && roomWindow(live.scheduled_at) !== "expired" && (
+          <section className="card grid gap-2" aria-labelledby="live-h">
+            <h2 id="live-h" className="sub-title">{t("live.track.title")}</h2>
+            <p className="text-sm">{t("live.track.text", { company: job?.companies?.name ?? t("track.team"), minutes: live.duration_minutes })}</p>
+            <p className="font-semibold"><LocalTime iso={live.scheduled_at} localeTag={formatLocale(locale)} /></p>
+            <div><Link href={`/meet/${live.token}`} className="btn btn-primary">{t("live.track.button")}</Link></div>
           </section>
         )}
 

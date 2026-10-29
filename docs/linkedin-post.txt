@@ -1,0 +1,46 @@
+I built a complete AI-powered hiring platform from scratch, and I would love your feedback.
+
+Hiring is slow, scattered across inboxes, and candidates rarely know where they stand. So I built a platform that connects both sides.
+
+𝗙𝗼𝗿 𝗰𝗮𝗻𝗱𝗶𝗱𝗮𝘁𝗲𝘀
+- Browse jobs with live search, filters and salary ranges
+- Apply with text, voice answers, CV and links, no account needed
+- Optional account: profile, saved jobs, daily job alerts
+- A private tracking page with live chat and read receipts
+
+𝗙𝗼𝗿 𝗿𝗲𝗰𝗿𝘂𝗶𝘁𝗲𝗿𝘀
+- Multi-company workspaces with roles (Super Admin, Admin, Reviewer)
+- Kanban board, internal notes, CV search, email templates
+- Bulk import of jobs from a CSV file
+- Real-time inbox and notifications over WebSockets
+
+𝗔𝗜 𝘁𝗵𝗮𝘁 𝗮𝘀𝘀𝗶𝘀𝘁𝘀, 𝗻𝗲𝘃𝗲𝗿 𝗱𝗲𝗰𝗶𝗱𝗲𝘀
+- Transcribes voice answers, parses CVs, scores and ranks applications
+- AI video interviews: the AI writes the questions, candidates answer on camera, and it evaluates what was said (the content only, never face, voice or appearance)
+- A human always makes the final decision
+
+𝗣𝗿𝗶𝘃𝗮𝗰𝘆 𝗯𝘆 𝗱𝗲𝘀𝗶𝗴𝗻: Row Level Security isolates each company's data, videos live in private storage with expiring links, and old data is deleted automatically.
+
+Available in English, French and Arabic, with full right-to-left support.
+
+𝗦𝘁𝗮𝗰𝗸: Next.js 16, React 19, TypeScript, Tailwind, Supabase (Postgres, Auth, Storage, Realtime), Groq, Vercel.
+
+𝗕𝗶𝗴𝗴𝗲𝘀𝘁 𝗹𝗲𝘀𝘀𝗼𝗻𝘀
+- Serverless platforms limit upload size (4.5 MB on Vercel), so videos go straight to storage
+- Security rules belong in the database
+- AI features need guardrails: fairness, privacy and a human in the loop
+
+𝗖𝗼𝗺𝗶𝗻𝗴 𝗻𝗲𝘅𝘁
+- Interview scheduling with calendar sync
+- Public API keys and webhooks
+- Reference checks
+- Subscription plans for companies
+
+Built in Mauritania.
+
+Try the platform: https://jobbridge-mr.vercel.app/
+Source code and demo GIFs: https://github.com/Abdallahi-Nah/hiring-platform/tree/main
+
+What would you add next?
+
+#NextJS #React #TypeScript #Supabase #WebDevelopment #BuildInPublic #OpenSource

@@ -19,6 +19,7 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { AiInterviewSection } from "./AiInterview";
+import { LiveInterviewSection } from "./LiveInterview";
 import { AutoRefresh } from "./AutoRefresh";
 import { DecisionEmailButton, HrEvaluationForm, StatusForm } from "./HrForms";
 import { RenewLink } from "./RenewLink";
@@ -411,6 +412,8 @@ export default async function CandidatePage({ params }: { params: Promise<{ id: 
           </section>
 
           <AiInterviewSection applicationId={app.id} applicationStatus={app.status} canManage={canManage} localeTag={formatLocale(locale)} />
+
+          <LiveInterviewSection applicationId={app.id} applicationStatus={app.status} canManage={canManage} localeTag={formatLocale(locale)} />
 
           <section className="card grid gap-4" aria-labelledby="chat-h">
             <div>
