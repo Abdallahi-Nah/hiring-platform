@@ -7,7 +7,10 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["pdfkit"],
   partialPrefetching: true,
   // Les polices du PDF sont lues sur le disque : Vercel doit les inclure dans la fonction.
-  outputFileTracingIncludes: { "/api/admin/jobs/[id]/export": ["./src/lib/fonts/**"] },
+  outputFileTracingIncludes: {
+    "/api/admin/jobs/[id]/export": ["./src/lib/fonts/**"],
+    "/api/admin/candidates/[id]/dossier": ["./src/lib/fonts/**"],
+  },
   async headers() {
     return [
       {

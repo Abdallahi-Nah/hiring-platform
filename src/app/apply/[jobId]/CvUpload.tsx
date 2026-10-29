@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { IconUpload } from "@/components/ui/icons";
 import { useT } from "@/i18n/client";
+import { createClient } from "@/lib/supabase/client";
 import type { QuestionRow } from "@/lib/jobs/schema";
 
 type Phase = "idle" | "uploading" | "done" | "error";
@@ -46,15 +47,23 @@ export function CvUpload({ jobId, question: q, maxMb, done, error, onBusy, onDon
 
     setFileName(file.name);
     setPhase("uploading");
-    const body = new FormData();
-    body.append("questionId", q.id);
-    body.append("file", file);
     try {
-      const res = await fetch(`/api/apply/${jobId}/cv`, { method: "POST", body });
-      if (!res.ok) {
+      const step = async (url: string, payload: unknown) => {
+        const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
         const json = await res.json().catch(() => null);
-        throw new Error(json?.error ?? t("apply.cv.uploadFailed"));
+        if (!res.ok) throw new Error(json?.error ?? t("apply.cv.uploadFailed"));
+        return json as { path: string; token: string; contentType: string };
+      };
+      // 1) lien d'envoi signé, 2) envoi direct vers le stockage (3 essais), 3) contrôle du fichier par le serveur
+      const target = await step(`/api/apply/${jobId}/cv`, { questionId: q.id, name: file.name, size: file.size });
+      let sent = false;
+      for (let k = 0; k < 3 && !sent; k++) {
+        const { error } = await createClient().storage.from("resumes").uploadToSignedUrl(target.path, target.token, file, { contentType: target.contentType });
+        if (!error) sent = true;
+        else if (k < 2) await new Promise((r) => setTimeout(r, 1500 * (k + 1)));
       }
+      if (!sent) throw new Error(t("apply.cv.uploadFailed"));
+      await step(`/api/apply/${jobId}/cv/confirm`, { questionId: q.id, name: file.name });
       setPhase("done");
       onDone();
     } catch (e) {

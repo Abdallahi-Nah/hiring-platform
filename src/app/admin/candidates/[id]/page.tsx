@@ -20,6 +20,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { AiInterviewSection } from "./AiInterview";
 import { LiveInterviewSection } from "./LiveInterview";
+import { Feedback, type FeedbackRow } from "./Feedback";
 import { AutoRefresh } from "./AutoRefresh";
 import { DecisionEmailButton, HrEvaluationForm, StatusForm } from "./HrForms";
 import { RenewLink } from "./RenewLink";
@@ -86,7 +87,8 @@ export default async function CandidatePage({ params }: { params: Promise<{ id: 
     .single();
   if (!app) notFound();
 
-  const [{ data: answers }, { data: resume }, { data: profiles }, { data: hr }, { data: ai }, { data: interviews }] =
+  // Toutes les lectures partent en même temps : chaque aller-retour vers la base coûte une demi-seconde ou plus.
+  const [{ data: answers }, { data: resume }, { data: profiles }, { data: hr }, { data: ai }, { data: interviews }, { data: noteRows }, { count: unreadMsgs }, , { data: fbRows }] =
     await Promise.all([
       supabase
         .from("answers")
@@ -105,14 +107,24 @@ export default async function CandidatePage({ params }: { params: Promise<{ id: 
         .select("id, media_url, link_url, analysis_status, score, audio_analysis, transcript, created_at")
         .eq("application_id", id)
         .order("created_at", { ascending: false }),
+      supabase
+        .from("candidate_notes")
+        .select("id, author_id, author_name, body, created_at")
+        .eq("application_id", id)
+        .order("created_at", { ascending: false })
+        .limit(200),
+      supabase.from("messages").select("id", { count: "exact", head: true }).eq("application_id", id).eq("sender", "candidate").is("read_at", null),
+      // Première ouverture par l'équipe : le candidat voit "Vue".
+      app.status !== "incomplete" && !app.viewed_at
+        ? Promise.resolve(createAdminClient().from("applications").update({ viewed_at: new Date().toISOString() }).eq("id", id).is("viewed_at", null)).then(() => ({ data: null }))
+        : Promise.resolve({ data: null }),
+      supabase.from("interview_feedback").select("author_id, author_name, communication, technical, motivation, culture, comment, updated_at").eq("application_id", id).order("updated_at", { ascending: false }),
     ]);
+  const feedback: FeedbackRow[] = (fbRows ?? []).map((f) => ({
+    ...f,
+    updated: new Date(f.updated_at).toLocaleDateString(formatLocale(locale), { dateStyle: "medium" }),
+  }));
 
-  const { data: noteRows } = await supabase
-    .from("candidate_notes")
-    .select("id, author_id, author_name, body, created_at")
-    .eq("application_id", id)
-    .order("created_at", { ascending: false })
-    .limit(200);
   const notes: Note[] = (noteRows ?? []).map((n) => ({
     id: n.id,
     author_id: n.author_id,
@@ -121,32 +133,17 @@ export default async function CandidatePage({ params }: { params: Promise<{ id: 
     created: new Date(n.created_at).toLocaleString(formatLocale(locale), { dateStyle: "medium", timeStyle: "short" }),
   }));
 
-  const { count: unreadMsgs } = await supabase
-    .from("messages")
-    .select("id", { count: "exact", head: true })
-    .eq("application_id", id)
-    .eq("sender", "candidate")
-    .is("read_at", null);
-  // Première ouverture par l'équipe : le candidat voit "Vue" ; les messages du candidat sont marqués lus.
-  if (app.status !== "incomplete") {
-    if (!app.viewed_at) await createAdminClient().from("applications").update({ viewed_at: new Date().toISOString() }).eq("id", id).is("viewed_at", null);
-  }
-
   // Liens temporaires (5 minutes) vers les fichiers privés.
   const admin = createAdminClient();
   const sign = async (bucket: string, path: string | null | undefined) =>
     path ? ((await admin.storage.from(bucket).createSignedUrl(path, SIGNED_URL_SECONDS)).data?.signedUrl ?? null) : null;
-  const cvUrl = await sign("resumes", resume?.file_url);
-  const audioUrls = new Map(
-    await Promise.all(
-      (answers ?? []).filter((a) => a.audio_url).map(async (a) => [a.id, await sign("audio", a.audio_url)] as const)
-    )
-  );
-  const interviewUrls = new Map(
-    await Promise.all(
-      (interviews ?? []).filter((i) => i.media_url).map(async (i) => [i.id, await sign("interviews", i.media_url)] as const)
-    )
-  );
+  const [cvUrl, audioPairs, interviewPairs] = await Promise.all([
+    sign("resumes", resume?.file_url),
+    Promise.all((answers ?? []).filter((a) => a.audio_url).map(async (a) => [a.id, await sign("audio", a.audio_url)] as const)),
+    Promise.all((interviews ?? []).filter((i) => i.media_url).map(async (i) => [i.id, await sign("interviews", i.media_url)] as const)),
+  ]);
+  const audioUrls = new Map(audioPairs);
+  const interviewUrls = new Map(interviewPairs);
 
   const sorted = (answers ?? [])
     .map((a) => ({ ...a, q: a.questions as unknown as QuestionInfo | null }))
@@ -185,6 +182,11 @@ export default async function CandidatePage({ params }: { params: Promise<{ id: 
               </Chip>
             )}
           </div>
+          {app.status !== "incomplete" && (
+            <div className="mt-3">
+              <a href={`/api/admin/candidates/${app.id}/dossier`} className="btn" download>{t("dossier.button")}</a>
+            </div>
+          )}
         </div>
         {ai?.status === "done" && ai.score != null && <Ring value={ai.score} />}
         <div className="w-full">
@@ -414,6 +416,16 @@ export default async function CandidatePage({ params }: { params: Promise<{ id: 
           <AiInterviewSection applicationId={app.id} applicationStatus={app.status} canManage={canManage} localeTag={formatLocale(locale)} />
 
           <LiveInterviewSection applicationId={app.id} applicationStatus={app.status} canManage={canManage} localeTag={formatLocale(locale)} />
+
+          {app.status !== "incomplete" && (
+            <section className="card grid gap-4" aria-labelledby="fb-h">
+              <div>
+                <h2 id="fb-h" className="sub-title">{t("fb.title")}</h2>
+                <p className="hint mt-1">{t("fb.hint")}</p>
+              </div>
+              <Feedback applicationId={app.id} userId={user.id} rows={feedback} />
+            </section>
+          )}
 
           <section className="card grid gap-4" aria-labelledby="chat-h">
             <div>

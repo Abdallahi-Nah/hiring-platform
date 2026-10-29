@@ -21,9 +21,9 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims vérifie le jeton sur place (et le renouvelle s'il a expiré) : pas d'appel réseau à chaque page.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims ?? null;
 
   if (!user && request.nextUrl.pathname.startsWith("/admin")) {
     return NextResponse.redirect(new URL("/login", request.url));

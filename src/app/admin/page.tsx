@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import Link from "next/link";
+import { LocalTime } from "@/components/ui/LocalTime";
 import { Avatar } from "@/components/ui/Avatar";
 import { Chip } from "@/components/ui/Chip";
 import { requireUser } from "@/lib/auth";
@@ -26,6 +27,8 @@ function buildDays(perDay: Map<string, number>, locale: string): Day[] {
   });
 }
 
+const hoursFromNow = (h: number) => new Date(Date.now() + h * 3_600_000).toISOString();
+
 export default async function AdminHome() {
   await connection(); // rendu à chaque demande (session et heure)
   const user = await requireUser();
@@ -33,7 +36,7 @@ export default async function AdminHome() {
   const supabase = await createClient();
   const head = { count: "exact" as const, head: true };
 
-  const [{ count: activeJobs }, { count: total }, { count: toReview }, { count: shortlisted }, { data: recent }, { data: recentDates }, { count: reached }, { count: interviewed }, { count: hired }, { data: viewRows }, { data: jobRows }, { data: hireRows }] =
+  const [{ count: activeJobs }, { count: total }, { count: toReview }, { count: shortlisted }, { data: recent }, { data: recentDates }, { count: reached }, { count: interviewed }, { count: hired }, { data: viewRows }, { data: jobRows }, { data: hireRows }, { data: upcoming }] =
     await Promise.all([
       supabase.from("job_forms").select("id", head).eq("is_active", true),
       supabase.from("applications").select("id", head).neq("status", "incomplete"),
@@ -57,6 +60,15 @@ export default async function AdminHome() {
       supabase.from("job_views").select("job_form_id").gte("viewed_at", daysAgo(30).toISOString()).limit(20000),
       supabase.from("job_forms").select("id, title").order("created_at", { ascending: false }).limit(200),
       supabase.from("hr_evaluations").select("updated_at, applications(submitted_at)").eq("hr_decision", "hire").limit(1000),
+      // Entretiens en direct des 7 prochains jours (ou commencés depuis moins de 2 heures)
+      supabase
+        .from("live_interviews")
+        .select("id, token, status, scheduled_at, duration_minutes, applications(id, email, job_forms(title))")
+        .in("status", ["scheduled", "in_progress"])
+        .gte("scheduled_at", hoursFromNow(-2))
+        .lte("scheduled_at", hoursFromNow(7 * 24))
+        .order("scheduled_at")
+        .limit(10),
     ]);
 
   // Candidatures par jour (30 derniers jours, jours en UTC)
@@ -132,6 +144,28 @@ export default async function AdminHome() {
           </div>
         ))}
       </div>
+
+      <section className="card grid gap-3" aria-labelledby="upc-h">
+        <h2 id="upc-h" className="sub-title">{t("live.upcoming")}</h2>
+        {(upcoming ?? []).length === 0 ? (
+          <p className="hint">{t("live.upcomingNone")}</p>
+        ) : (
+          <ul className="divide-y divide-line">
+            {(upcoming ?? []).map((u) => {
+              const a = u.applications as unknown as { id: string; email: string | null; job_forms: { title: string } | null } | null;
+              return (
+                <li key={u.id} className="flex flex-wrap items-center gap-3 py-3">
+                  <div className="min-w-0 flex-1">
+                    <Link href={`/admin/candidates/${a?.id}`} className="block truncate font-semibold hover:underline">{a?.email ?? t("admin.dashboard.noEmail")}</Link>
+                    <span className="hint block truncate">{a?.job_forms?.title} · <LocalTime iso={u.scheduled_at} localeTag={formatLocale(locale)} /> · {t("live.hr.minutes", { n: u.duration_minutes })}</span>
+                  </div>
+                  <Link href={`/meet/${u.token}`} className="btn">{t("live.upcomingOpen")}</Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="card grid gap-3">

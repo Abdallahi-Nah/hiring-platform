@@ -1,4 +1,6 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
+import { sessionUser } from "@/lib/session-user";
 import { createClient } from "@/lib/supabase/server";
 
 export type Role = "super_admin" | "admin" | "reviewer";
@@ -14,12 +16,11 @@ export type CurrentUser = {
   isPlatformAdmin: boolean;
 };
 
-export async function getCurrentUser(): Promise<CurrentUser | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+// cache() : le layout et la page demandent l'utilisateur dans la même requête, la base n'est interrogée qu'une fois.
+export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
+  const user = await sessionUser();
   if (!user) return null;
+  const supabase = await createClient();
 
   const { data: profile, error } = await supabase
     .from("profiles")
@@ -34,7 +35,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   return {
     id: user.id,
-    email: user.email ?? "",
+    email: user.email,
     role: profile.role as Role,
     fullName: profile.full_name,
     companyId: profile.company_id,
@@ -42,7 +43,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     companyLogo: (profile.companies as unknown as { logo_path: string | null } | null)?.logo_path ?? null,
     isPlatformAdmin: profile.is_platform_admin,
   };
-}
+});
 
 export async function requireUser(allowed?: Role[]): Promise<CurrentUser> {
   const user = await getCurrentUser();
