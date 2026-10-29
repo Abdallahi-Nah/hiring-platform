@@ -29,8 +29,12 @@ export function MeetRoom({ token, role, liveId, iceServers, peerName, backHref }
   const [draft, setDraft] = useState("");
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [ready, setReady] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [shareError, setShareError] = useState("");
 
   const stream = useRef<MediaStream | null>(null);
+  const screen = useRef<MediaStream | null>(null);
+  const swapVideo = useRef<(track: MediaStreamTrack) => Promise<void>>(async () => {});
   const remoteVideo = useRef<HTMLVideoElement>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
   const hangup = useRef<() => void>(() => {});
@@ -39,7 +43,8 @@ export function MeetRoom({ token, role, liveId, iceServers, peerName, backHref }
 
   // Attache la caméra locale à une balise <video> (aperçu du hall et petite vignette de la salle).
   const attachLocal = (el: HTMLVideoElement | null) => {
-    if (el && stream.current && el.srcObject !== stream.current) el.srcObject = stream.current;
+    const src = screen.current ?? stream.current;
+    if (el && src && el.srcObject !== src) el.srcObject = src;
   };
 
   async function enableCamera() {
@@ -65,6 +70,37 @@ export function MeetRoom({ token, role, liveId, iceServers, peerName, backHref }
     tracks?.forEach((tr) => (tr.enabled = next));
     if (kind === "audio") setMicOn(next);
     else setCamOn(next);
+  }
+
+  // Partage d'écran : la vidéo de l'écran remplace celle de la caméra (replaceTrack, sans nouvelle négociation).
+  async function stopShare() {
+    const s = screen.current;
+    if (!s) return;
+    screen.current = null;
+    s.getTracks().forEach((tr) => {
+      tr.onended = null;
+      tr.stop();
+    });
+    const cam = stream.current?.getVideoTracks()[0];
+    if (cam) await swapVideo.current(cam);
+    setSharing(false);
+  }
+
+  async function startShare() {
+    setShareError("");
+    try {
+      const s = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: { ideal: 15 } }, audio: false });
+      const track = s.getVideoTracks()[0];
+      track.contentHint = "detail";
+      screen.current = s;
+      // Le bouton "Arrêter le partage" du navigateur ramène la caméra.
+      track.onended = () => void stopShare();
+      await swapVideo.current(track);
+      setSharing(true);
+    } catch (e) {
+      // Annuler la fenêtre de choix n'est pas une erreur.
+      if (!(e instanceof DOMException && e.name === "NotAllowedError")) setShareError(t("live.room.errShare"));
+    }
   }
 
   // Toute la connexion vit dans cet effet : il démarre quand on entre dans la salle et se nettoie quand on sort.
@@ -98,7 +134,8 @@ export function MeetRoom({ token, role, liveId, iceServers, peerName, backHref }
       const p = new RTCPeerConnection({ iceServers });
       pc = p;
       remoteSet = false;
-      local.getTracks().forEach((tr) => p.addTrack(tr, local));
+      const video = screen.current?.getVideoTracks()[0] ?? local.getVideoTracks()[0];
+      [...local.getAudioTracks(), video].forEach((tr) => tr && p.addTrack(tr, local));
       p.onicecandidate = (e) => {
         if (e.candidate) send("ice", { c: e.candidate.toJSON() });
       };
@@ -211,6 +248,11 @@ export function MeetRoom({ token, role, liveId, iceServers, peerName, backHref }
 
     function teardown() {
       closed = true;
+      screen.current?.getTracks().forEach((tr) => {
+        tr.onended = null;
+        tr.stop();
+      });
+      screen.current = null;
       clearTimeout(retryTimer);
       dcRef.current = null;
       pc?.close();
@@ -219,6 +261,10 @@ export function MeetRoom({ token, role, liveId, iceServers, peerName, backHref }
       local.getTracks().forEach((tr) => tr.stop());
       stream.current = null;
     }
+    swapVideo.current = async (track) => {
+      const sender = pc?.getSenders().find((x) => x.track?.kind === "video");
+      if (sender) await sender.replaceTrack(track);
+    };
     hangup.current = teardown;
     announce.current = (event) => send(event);
     return () => {
@@ -236,6 +282,7 @@ export function MeetRoom({ token, role, liveId, iceServers, peerName, backHref }
     setPeer("absent");
     setChatReady(false);
     setReady(false);
+    setSharing(false);
     setMicOn(true);
     setCamOn(true);
     setStage("left");
@@ -290,6 +337,8 @@ export function MeetRoom({ token, role, liveId, iceServers, peerName, backHref }
     );
   }
 
+  // Les téléphones ne savent pas partager l'écran : le bouton est alors caché.
+  const canShare = typeof navigator.mediaDevices?.getDisplayMedia === "function";
   const status: Record<Peer, string> = {
     absent: t(role === "host" ? "live.room.waitGuest" : "live.room.waitHost"),
     connecting: t("live.room.connecting"),
@@ -304,11 +353,14 @@ export function MeetRoom({ token, role, liveId, iceServers, peerName, backHref }
         <div className="relative overflow-hidden rounded-2xl bg-black">
           <video ref={remoteVideo} autoPlay playsInline className="aspect-video w-full" aria-label={peerName} />
           {peer !== "connected" && <div className="absolute inset-0 grid place-items-center p-4 text-center text-sm text-white/80">{status[peer]}</div>}
-          <video ref={attachLocal} autoPlay muted playsInline className="absolute bottom-3 end-3 aspect-video w-28 rounded-lg border-2 border-white/70 bg-black object-cover shadow-lg [transform:scaleX(-1)] sm:w-40" aria-label={t("live.room.you")} />
+          <video ref={attachLocal} autoPlay muted playsInline className={`absolute bottom-3 end-3 aspect-video w-28 rounded-lg border-2 border-white/70 bg-black object-cover shadow-lg sm:w-40 ${sharing ? "" : "[transform:scaleX(-1)]"}`} aria-label={t("live.room.you")} />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" className="btn" aria-pressed={!micOn} onClick={() => toggle("audio")}>{micOn ? t("live.room.muteMic") : t("live.room.unmuteMic")}</button>
           <button type="button" className="btn" aria-pressed={!camOn} onClick={() => toggle("video")}>{camOn ? t("live.room.camOff") : t("live.room.camOn")}</button>
+          {canShare && (
+            <button type="button" className="btn" aria-pressed={sharing} onClick={() => void (sharing ? stopShare() : startShare())}>{sharing ? t("live.room.stopShare") : t("live.room.share")}</button>
+          )}
           <button type="button" className="btn btn-danger" onClick={leave}>{t("live.room.leave")}</button>
           {role === "host" &&
             (confirmEnd ? (
@@ -320,6 +372,8 @@ export function MeetRoom({ token, role, liveId, iceServers, peerName, backHref }
               <button type="button" className="btn" onClick={() => setConfirmEnd(true)}>{t("live.room.end")}</button>
             ))}
         </div>
+        {sharing && <p className="text-sm font-semibold text-primary" role="status">{t("live.room.sharing")}</p>}
+        {shareError && <p className="error-text" role="alert">{shareError}</p>}
         <p className="hint">{t("live.room.noRecord")}</p>
       </div>
 
