@@ -10,6 +10,7 @@ import { roleLabel } from "@/i18n/labels";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { AdminNav } from "./AdminNav";
+import { BurgerButton, Drawer, DrawerProvider } from "./MobileDrawer";
 import { LiveSync } from "./LiveSync";
 import { NotificationBell } from "./NotificationBell";
 
@@ -27,8 +28,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .is("read_at", null);
 
   return (
-    <div className="shell">
-      <aside className="side">
+    <DrawerProvider>
+      <Drawer>
         {/* Nom et logo de l'entreprise de l'utilisateur (à la place du nom de la plateforme) */}
         <Link href="/admin" className="brand px-2.5 pb-4 pt-1" title={user.companyName} aria-label={user.companyName}>
           {user.companyLogo ? (
@@ -51,15 +52,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </button>
           </form>
         </div>
-      </aside>
+      </Drawer>
       <main className="main">
-        <div className="mb-4 flex items-center justify-end gap-2">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <BurgerButton />
+          <span className="flex items-center gap-2 ms-auto">
           <NotificationBell />
           <LanguageSwitcher />
+          </span>
         </div>
         {children}
         <LiveSync />
       </main>
-    </div>
+    </DrawerProvider>
   );
 }

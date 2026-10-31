@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconDashboard, IconJobs, IconBuilding, IconChat, IconLogout, IconMail, IconSearch, IconUser, IconUsers } from "@/components/ui/icons";
-import { logout } from "@/app/login/actions";
+import { IconDashboard, IconJobs, IconBuilding, IconChat, IconMail, IconSearch, IconUser, IconUsers } from "@/components/ui/icons";
 import { useT } from "@/i18n/client";
 
 type Item = { href: string; label: string; icon: React.ReactNode; exact?: boolean; badge?: number };
@@ -42,36 +41,14 @@ export function AdminNav({ isSuperAdmin, isPlatformAdmin, canEmail, unreadMessag
           </Link>
         ))}
       </nav>
-
-      {/* Barre du bas sur téléphone */}
-      <nav className="tabbar" style={{ gridTemplateColumns: `repeat(${items.length + 1}, minmax(66px, 1fr))`, overflowX: "auto" }} aria-label={t("admin.nav.mainMobile")}>
-        {items.map((i) => (
-          <Link key={i.href} href={i.href} className={active(i) ? "tab-on" : ""}>
-            <span className="relative">
-              {i.icon}
-              <Badge n={i.badge} tab />
-            </span>
-            {i.label}
-          </Link>
-        ))}
-        <form action={logout} className="contents">
-          <button type="submit">
-            <IconLogout />
-            {t("admin.nav.signOut")}
-          </button>
-        </form>
-      </nav>
     </>
   );
 }
 
-function Badge({ n, tab }: { n?: number; tab?: boolean }) {
+function Badge({ n }: { n?: number }) {
   if (!n) return null;
   return (
-    <span
-      className={tab ? "absolute -end-2 -top-1 grid min-w-4 place-items-center rounded-full bg-bad px-1 text-[10px] font-bold leading-4 text-white" : "nav-badge"}
-      aria-label={String(n)}
-    >
+    <span className="nav-badge" aria-label={String(n)}>
       {n > 9 ? "9+" : n}
     </span>
   );

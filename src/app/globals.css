@@ -183,7 +183,7 @@ body {
   .live-results { transition: opacity .15s; }
   .live-results[data-pending="true"] { opacity: .5; }
   .cards-m { display: none; }
-  .tabbar { display: none; }
+  .burger, .drawer-close, .drawer-backdrop { display: none; }
 }
 
 /* Tablette et petit ordinateur (jusqu'à 1180 px) : page candidat sur une colonne */
@@ -214,16 +214,21 @@ body {
   h1.title { font-size: 22px; }
   .btn, .field { min-height: 44px; }
   .shell { display: block; }
-  .side { display: none; }
-  .main { padding: 18px 16px 96px; }
+  .main { padding: 18px 16px 40px; }
+  /* Tiroir : le menu sort du bord (la droite en arabe) et le fond sombre le recouvre */
+  .burger { display: inline-flex; }
+  .drawer-close { display: inline-flex; position: absolute; top: 10px; inset-inline-end: 10px; }
+  .side { position: fixed; inset-block: 0; inset-inline-start: 0; width: min(84vw, 300px); height: 100dvh; z-index: 50; overflow-y: auto; transform: translateX(-100%); visibility: hidden; transition: transform .22s ease, visibility .22s; box-shadow: 0 0 40px rgb(0 0 0 / .25); }
+  [dir="rtl"] .side { transform: translateX(100%); }
+  /* À l'ouverture la visibilité change tout de suite (sinon le focus est refusé) ; à la fermeture elle attend la fin du glissement */
+  .side.side-open { transform: none; visibility: visible; transition: transform .22s ease, visibility 0s; }
+  .drawer-backdrop { display: block; position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / .45); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .drawer-backdrop.on { opacity: 1; pointer-events: auto; }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .table-wrap table { display: none; }
   .table-wrap { background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
   .cards-m { display: grid; gap: 10px; }
   .cand { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow); display: grid; gap: 10px; }
-  .tabbar { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; bottom: 0; inset-inline: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 8px 6px 18px; z-index: 5; }
-  .tabbar a, .tabbar button { display: grid; justify-items: center; gap: 2px; font-size: 11px; color: var(--muted); font-weight: 600; background: none; border: 0; min-height: 44px; }
-  .tabbar .tab-on { background: #00b141; color: #fff; font-weight: 700; border-radius: 12px; }
   .detail { grid-template-columns: minmax(0, 1fr); }
   .sticky-col { position: static; }
   .card { padding: 16px; }

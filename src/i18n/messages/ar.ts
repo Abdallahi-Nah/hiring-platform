@@ -885,7 +885,7 @@ export const ar: Messages = {
     },
   },
   admin: {
-    nav: { main: "القائمة الرئيسية", mainMobile: "القائمة الرئيسية (الجوال)", dashboard: "الرئيسية", jobs: "الوظائف", users: "المستخدمون", signOut: "تسجيل الخروج", account: "الحساب", company: "الشركة", companies: "الشركات" },
+    nav: { menu: "القائمة", closeMenu: "إغلاق القائمة", main: "القائمة الرئيسية", mainMobile: "القائمة الرئيسية (الجوال)", dashboard: "الرئيسية", jobs: "الوظائف", users: "المستخدمون", signOut: "تسجيل الخروج", account: "الحساب", company: "الشركة", companies: "الشركات" },
     roles: { super_admin: "مسؤول أعلى", admin: "مسؤول", reviewer: "مراجع" },
     common: { back: "رجوع", save: "حفظ", saving: "جارٍ الحفظ...", saved: "تم الحفظ", delete: "حذف", error: "خطأ", you: "أنت", notFoundApp: "الطلب غير موجود.", invalidData: "بيانات غير صالحة" },
     status: {

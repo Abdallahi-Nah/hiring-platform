@@ -863,7 +863,7 @@ export const fr: Messages = {
     },
   },
   admin: {
-    nav: { main: "Principal", mainMobile: "Principal (mobile)", dashboard: "Tableau de bord", jobs: "Offres", users: "Utilisateurs", signOut: "Se déconnecter", account: "Compte", company: "Entreprise", companies: "Entreprises" },
+    nav: { menu: "Menu", closeMenu: "Fermer le menu", main: "Principal", mainMobile: "Principal (mobile)", dashboard: "Tableau de bord", jobs: "Offres", users: "Utilisateurs", signOut: "Se déconnecter", account: "Compte", company: "Entreprise", companies: "Entreprises" },
     roles: { super_admin: "Super Admin", admin: "Admin", reviewer: "Évaluateur" },
     common: { back: "Retour", save: "Enregistrer", saving: "Enregistrement...", saved: "Enregistré", delete: "Supprimer", error: "Erreur", you: "vous", notFoundApp: "Candidature introuvable.", invalidData: "Données invalides" },
     status: {

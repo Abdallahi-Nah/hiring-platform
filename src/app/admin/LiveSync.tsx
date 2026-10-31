@@ -56,7 +56,7 @@ export function LiveSync() {
   const isMessage = toast.kind === "message";
   const href = isMessage && toast.applicationId ? `/admin/messages?c=${toast.applicationId}` : toast.applicationId ? `/admin/candidates/${toast.applicationId}` : "/admin";
   return (
-    <div className="card fixed bottom-20 end-4 z-40 flex max-w-xs items-center gap-3 !p-3 shadow-lg md:bottom-6" role="status">
+    <div className="card fixed bottom-4 end-4 z-40 flex max-w-xs items-center gap-3 !p-3 shadow-lg" role="status">
       <Link href={href} onClick={() => setToast(null)} className="flex-1 text-sm font-semibold">
         {t(isMessage ? "rt.toast.message" : toast.kind === "interview" ? "ivid.toast" : toast.kind === "live" ? "live.toast" : "rt.toast.application")}
       </Link>

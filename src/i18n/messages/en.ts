@@ -864,7 +864,7 @@ export const en = {
     },
   },
   admin: {
-    nav: { main: "Main", mainMobile: "Main (mobile)", dashboard: "Dashboard", jobs: "Jobs", users: "Users", signOut: "Sign out", account: "Account", company: "Company", companies: "Companies" },
+    nav: { menu: "Menu", closeMenu: "Close menu", main: "Main", mainMobile: "Main (mobile)", dashboard: "Dashboard", jobs: "Jobs", users: "Users", signOut: "Sign out", account: "Account", company: "Company", companies: "Companies" },
     roles: { super_admin: "Super Admin", admin: "Admin", reviewer: "Reviewer" },
     common: { back: "Back", save: "Save", saving: "Saving...", saved: "Saved", delete: "Delete", error: "Error", you: "you", notFoundApp: "Application not found.", invalidData: "Invalid data" },
     status: {
